@@ -6,12 +6,10 @@ rm -rf package/emortal/luci-app-athena-led
 rm -rf package/luci-app-athena-led
 
 
-# （可选）根治物理端口映射：交换 DTS 中 lan1 和 lan4 的 label
+# 先将 dp1 的 "lan3" 改为临时占位符，再完成对调，避免冲突
+sed -i '/&dp1 {/,/};/s/label = "lan3";/label = "lan_tmp";/g' ipq6000-cmiot.dtsi
+sed -i '/&dp4 {/,/};/s/label = "lan1";/label = "lan3";/g' ipq6000-cmiot.dtsi
+sed -i '/&dp1 {/,/};/s/label = "lan_tmp";/label = "lan1";/g' ipq6000-cmiot.dtsi
 
-DTSFILE="target/linux/qualcommax/files/arch/arm64/boot/dts/qcom/ipq6000-zn-m2.dts"
-if [ -f "$DTSFILE" ]; then
-    echo "[Patch] Swapping lan1/lan4 label in DTS"
-    sed -i 's/label = "lan1"/label = "lan1_temp"/g' "$DTSFILE"
-    sed -i 's/label = "lan4"/label = "lan1"/g' "$DTSFILE"
-    sed -i 's/label = "lan1_temp"/label = "lan4"/g' "$DTSFILE"
-fi
+# 返回源码根目录继续编译
+cd ../../../../
